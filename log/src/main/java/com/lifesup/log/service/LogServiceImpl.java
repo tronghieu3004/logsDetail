@@ -2,10 +2,17 @@ package com.lifesup.log.service;
 
 import com.lifesup.log.model.LogEntity;
 import com.lifesup.log.repository.LogRepository;
+
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceUnit;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,9 +30,12 @@ import java.util.Optional;
 @Transactional
 public class LogServiceImpl implements LogService {
     private LogRepository repository;
+    @PersistenceUnit
+    private final EntityManagerFactory entityManagerFactory;
     @Autowired
-    public LogServiceImpl(LogRepository repository) {
+    public LogServiceImpl(LogRepository repository, EntityManagerFactory entityManagerFactory) {
         this.repository = repository;
+        this.entityManagerFactory = entityManagerFactory;
     }
 
     @Override
@@ -59,7 +69,7 @@ public class LogServiceImpl implements LogService {
             return repository.findAll();
         }
         logEntityList = repository.searchAllFields(keyword);
-        logEntityList.addAll(repository.findAllByApiKey(keyword));
+//        logEntityList.addAll(repository.findAllByApiKey(keyword));
         return  logEntityList;
     }
 
@@ -95,7 +105,7 @@ public class LogServiceImpl implements LogService {
         if (direct.equals("")){direct = "desc";}
         if (keyword.equals("")) { keyword ="";}
         if (colName.equals("")){colName="createdAt";}
-        if (days == "") {day =0;}else {day = Integer.parseInt(days); }
+        if (days.equals("")) {day =0;}else {day = Integer.parseInt(days); }
         LocalDateTime today,dayStart;
         today = LocalDateTime.now();
         dayStart = today.minusDays(day);
@@ -104,8 +114,13 @@ public class LogServiceImpl implements LogService {
         } else {
             sort = Sort.by(Sort.Direction.ASC, colName);
         }
-        return repository.smartSearch(keyword, dayStart, sort);
+//        return repository.smartSearch(keyword, dayStart, sort);
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        return repository.filterAndSearch(entityManager,keyword, dayStart, sort);
     }
 
+    public Page<LogEntity> getAllLogs(Pageable pageable){
+        return repository.findAll(pageable);
+    }
 }
 

@@ -2,6 +2,8 @@ package com.lifesup.log.controller;
 
 import com.lifesup.log.model.LogEntity;
 import com.lifesup.log.service.LogService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -47,5 +49,9 @@ public class MainController {
     @GetMapping("/logs/searchsmart")
     public List<LogEntity> smartSearch(@RequestParam(name = "find")String keyword,@RequestParam String days,@RequestParam(name = "columnName") String colName,@RequestParam String direct){
         return logService.smartSearch(keyword,days,colName,direct);
+    }
+    @GetMapping("/")
+    public Page<LogEntity> getAllLogs(Pageable pageable) {
+        return logService.getAllLogs(pageable);
     }
 }

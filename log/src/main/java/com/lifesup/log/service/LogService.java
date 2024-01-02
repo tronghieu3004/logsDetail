@@ -1,6 +1,8 @@
 package com.lifesup.log.service;
 
 import com.lifesup.log.model.LogEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -14,4 +16,6 @@ public interface LogService {
     List<LogEntity> nearDay(int nDayAgo);
     List<LogEntity> addAll(List<LogEntity> listInput);
     List<LogEntity> smartSearch(String keyword, String days, String colName, String direct);
+
+    Page<LogEntity> getAllLogs(Pageable pageable);
 }
